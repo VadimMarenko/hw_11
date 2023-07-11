@@ -19,9 +19,14 @@ class Phone(Field):
     pass
 
 
+class Birthday(Field):
+    pass
+
+
 class Record():
-    def __init__(self, name: Name, phone=None):
-        self.name = name        
+    def __init__(self, name:Name, birthday=None, phone=None):
+        self.name = name
+        self.birthday = birthday        
         self.phones = [phone] if phone else []
 
     def __str__(self):
