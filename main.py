@@ -1,4 +1,5 @@
-from classes import AddressBook, Record, Field, Name, Phone
+from datetime import datetime
+from classes import AddressBook, Record, Field, Birthday, Name, Phone
 
 
 phone_book = AddressBook({})
@@ -20,8 +21,20 @@ def input_error(func):
         return result
     return wrapper
 
+@input_error
+def birthday_command(*args):
+    name = Name(args[0].capitalize())
+    bd = Birthday(datetime.strptime(args[1], "%Y-%m-%d").date())
+    if name in phone_book:
+        rec = phone_book[name]    
+        rec.birthday = bd
+    else:
+        rec = Record(name, birthday=bd)
+        phone_book.add_record(rec)
+    return f"{name}'s birthday {bd}"
 
-def greeting(*args):
+
+def greeting_command(*args):
     result = "How can I help you?"
     return result
 
@@ -39,7 +52,7 @@ def checking_args(*args):
     
 
 @input_error
-def add(*args):
+def add_command(*args):
     result = checking_args(*args)
     if result:
         return result
@@ -52,7 +65,7 @@ def add(*args):
 
 
 @input_error
-def change(*args): 
+def change_command(*args): 
     result = checking_args(*args)
     if result:
         return result
@@ -74,7 +87,7 @@ def change(*args):
 
 
 @input_error
-def phone(*args):
+def phone_command(*args):
     if args[0].isalpha:
         name = Name(args[0].capitalize())
         record = Record(name)
@@ -87,23 +100,25 @@ def phone(*args):
         return "Give me name please"
         
     
-def show_all(*args):    
+def show_all_command(*args):
     return "\n".join((str(record.name) + ' - ' + ', '.join(str(phone) for phone in record.phones)) for record in phone_book.values())
 
-def exit(*args):
+def exit_command(*args):
     return "Good bye!"
 
 
 def no_command(*args):    
-    return "Unknown command. Supported commands\n\nadd name number\nchange name number\nphone name\nshow all\nexit"
+    return "Unknown command. Supported commands\n \
+        \nadd name number\nchange name number\nphone name\nshow all\nbirthday name yyyy-mm-dd\nexit"
 
 
-commands = {greeting: ("hello", ),
-            add: ("add", ),
-            change: ("change", ),
-            phone: ("phone", ),
-            show_all: ("show all", ),
-            exit: ("good bye", "close", "exit")}
+commands = {greeting_command: ("hello", ),
+            add_command: ("add", ),
+            change_command: ("change", ),
+            phone_command: ("phone", ),
+            show_all_command: ("show all", ),
+            birthday_command: ("birthday", ),
+            exit_command: ("good bye", "close", "exit")}
 
 
 def parser(text: str) -> tuple[callable, tuple[str]|None]:

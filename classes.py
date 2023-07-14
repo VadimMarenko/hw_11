@@ -1,3 +1,4 @@
+from datetime import datetime
 from collections import UserDict
 
 class Field():
@@ -24,16 +25,18 @@ class Birthday(Field):
 
 
 class Record():
-    def __init__(self, name:Name, birthday=None, phone=None):
-        self.name = name
+    def __init__(self, name:Name, phone=None, birthday=None):
+        self.name = name        
+        self.phones = [] #[phone] if phone else []
         self.birthday = birthday        
-        self.phones = [phone] if phone else []
+        if phone:
+            self.add_phone(phone)
 
     def __str__(self):
-        return f'{self.name.value}: {self.phones}'
+        return str(self)
         
     def __repr__(self):
-        return str(self.phones)
+        return str(self)
         
     def add_phone(self, phone: Phone):
         self.phones.append(phone)
@@ -47,6 +50,17 @@ class Record():
         self.delete_phone(old_phone)
         self.phones.append(new_phone)
         return f"phone {old_phone} was replaced by {new_phone}"
+    
+    def days_to_birthday(self, birthday:datetime):
+        date_now = datetime.now().date()
+        date_bd = self.birthday.replace(year=date_now.year)
+        if date_bd >= date_now:            
+            result = date_bd - date_now
+        else:
+            date_bd = self.birthday.replace(year=date_now.year + 1)
+            result = date_bd - date_now
+
+        return f"{self.name}'s birthday will be in {result} days"
 
 
 class AddressBook(UserDict):    
