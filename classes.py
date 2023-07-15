@@ -3,6 +3,7 @@ from collections import UserDict
 
 class Field():
     def __init__(self, value=None):
+        self.__value = None
         self.value = value
     
     def __str__(self):
@@ -10,24 +11,66 @@ class Field():
     
     def __repr__(self):
         return str(self.value)    
- 
-     
+    
+    @property
+    def value(self):
+        return self.__value
+    
+    @value.setter
+    def value(self, value):
+        if value:
+            self.__value = value
+        
 class Name(Field):
     pass
 
 
 class Phone(Field):
-    pass
+    @property
+    def value(self):
+        return self.__value
+    
+    @value.setter
+    def value(self, value):
+        self.__value = Phone.__test_phone(value)        
+
+    @staticmethod
+    def __test_phone(value):
+        if value:
+            if value.startswith("+"):
+                value = value[1:]
+            
+            if value.isdigit():
+                return value
+            else:
+                raise ValueError("Phone must be a number.")
+        else:            
+            raise ValueError("Enter phone number.")
 
 
 class Birthday(Field):
-    pass
-
+    @property
+    def value(self):
+        return self.__value
+    
+    @value.setter
+    def value(self, value):
+        self.__value = Birthday.__test_date(value)
+           
+    @staticmethod
+    def __test_date(value):
+        if value:
+            try:
+                return datetime.strptime(value, "%d-%m-%Y").date()                
+            except ValueError as e:
+                raise ValueError(f"{e} \nPlease enter the date in the format dd-mm-yyyy.")
+        else:
+            raise TypeError("Please enter birthday.")
 
 class Record():
-    def __init__(self, name:Name, phone=None, birthday=None):
+    def __init__(self, name:Name, phone: Phone=None, birthday: Birthday=None):
         self.name = name        
-        self.phones = [] #[phone] if phone else []
+        self.phones = []
         self.birthday = birthday        
         if phone:
             self.add_phone(phone)
@@ -39,7 +82,10 @@ class Record():
         return str(self)
         
     def add_phone(self, phone: Phone):
-        self.phones.append(phone)
+        if phone.value not in [p.value for p in self.phones]:
+            self.phones.append(phone)
+            return f"Phone {phone} add to contact {self.name}"
+        return f"Phone {phone} present in phones of contact {self.name}"
 
     def delete_phone(self, phone):
         for item in self.phones:
@@ -51,16 +97,16 @@ class Record():
         self.phones.append(new_phone)
         return f"phone {old_phone} was replaced by {new_phone}"
     
-    def days_to_birthday(self, birthday:datetime):
+    def days_to_birthday(self, birthday):
         date_now = datetime.now().date()
-        date_bd = self.birthday.replace(year=date_now.year)
+        date_bd = birthday.value.replace(year=date_now.year)
         if date_bd >= date_now:            
             result = date_bd - date_now
         else:
-            date_bd = self.birthday.replace(year=date_now.year + 1)
+            date_bd = birthday.value.replace(year=date_now.year + 1)
             result = date_bd - date_now
 
-        return f"{self.name}'s birthday will be in {result} days"
+        return f"{self.name}'s birthday will be in {result.days} days"
 
 
 class AddressBook(UserDict):    
@@ -70,4 +116,8 @@ class AddressBook(UserDict):
             return f"Added {record.name.value} with phone number {', '.join(str(phone) for phone in record.phones)}"
         else:            
             return f"Record {record.name.value} alredy exists"
+        
+    def iterator(self, n):
+        pass
+
         
