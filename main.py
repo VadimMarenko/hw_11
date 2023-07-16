@@ -2,7 +2,7 @@ from datetime import datetime
 from classes import AddressBook, Record, Birthday, Name, Phone
 
 
-phone_book = AddressBook({})
+address_book = AddressBook({})
 
 
 def input_error(func):
@@ -18,14 +18,14 @@ def input_error(func):
 def birthday_command(*args):
     name = Name(args[0].capitalize())
     bd = Birthday(args[1])
-    if name in phone_book:
-        rec: Record = phone_book[str(name)]    
+    if name in address_book:
+        rec: Record = address_book[str(name)]    
         rec.birthday = bd
         return rec.days_to_birthday(bd)
         return f"Added date of birth {str(rec.birthday)} for {name}"
     else:
         rec = Record(name, birthday=bd)
-        phone_book.add_record(rec)
+        address_book.add_record(rec)
         return rec.days_to_birthday(bd)
     return f"{name}'s birthday {bd}"
 
@@ -34,12 +34,12 @@ def birthday_command(*args):
 def add_command(*args):
     name = Name(args[0].capitalize())
     phone = Phone(args[1])
-    rec: Record = phone_book.get(str(name))
+    rec: Record = address_book.get(str(name))
     if rec:
         return rec.add_phone(phone)
     else:
         record = Record(name, phone)
-        return phone_book.add_record(record)
+        return address_book.add_record(record)
      
 
 @input_error
@@ -47,7 +47,7 @@ def change_command(*args):
     name = Name(args[0].capitalize())
     old_phone = Phone(args[1])
     new_phone = Phone(args[2])  
-    rec: Record = phone_book.get(str(name))
+    rec: Record = address_book.get(str(name))
     if rec:
         return rec.change_phone(old_phone, new_phone)
     return f"No contact {name} in address book"
@@ -57,7 +57,7 @@ def change_command(*args):
 def phone_command(*args):    
     name = Name(args[0].capitalize())
     record = Record(name)
-    for key, value in phone_book.items():
+    for key, value in address_book.items():
         if key == record.name.value:                             
             return f"{key} has phone number {', '.join(str(phone) for phone in value.phones)}"
     else:
@@ -70,7 +70,7 @@ def greeting_command(*args):
 
 
 def show_all_command(*args):
-    return "\n".join((str(record.name) + ' ' + (str(record.birthday) if record.birthday else "-") + ' ' + (', '.join(str(phone) for phone in record.phones))) for record in phone_book.values())
+    return "\n".join((str(record.name) + ' ' + (str(record.birthday) if record.birthday else "-") + ' ' + (', '.join(str(phone) for phone in record.phones))) for record in address_book.values())
 
 
 def exit_command(*args):
