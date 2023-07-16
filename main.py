@@ -86,11 +86,11 @@ def show_all_command(*args):
         try:
             result = next(page)
             print("_" * 100)
-            print("| {:15} | {:15} | {:60} ".format("name", "birthday", "phones")) 
+            print(" {:15} | {:15} | {:60} ".format("name", "birthday", "phones")) 
             print("-" * 100)          
             for record in result:
                 phones = ', '.join(str(phone) for phone in record.phones)
-                print("| {:<15} | {:<15} | {:<60} ".format(str(record.name),  
+                print(" {:<15} | {:<15} | {:<60} ".format(str(record.name),  
                                                str(record.birthday) if record.birthday else "-",
                                                phones))             
         except StopIteration as e:
