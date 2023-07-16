@@ -76,10 +76,10 @@ class Record():
             self.add_phone(phone)
 
     def __str__(self):
-        return str(self)
+        return f"self.name: self.phones"
         
     def __repr__(self):
-        return str(self)
+        return f"self.name: self.phones"
         
     def add_phone(self, phone: Phone):
         if phone.value not in [p.value for p in self.phones]:
@@ -97,6 +97,15 @@ class Record():
         self.phones.append(new_phone)
         return f"phone {old_phone} was replaced by {new_phone}"
     
+    def add_birthday(self, birthday: Birthday):
+        if self.birthday:
+            return f"The contact {self.name} contains a birthday {self.birthday}"
+        
+        else:
+            self.birthday = birthday
+            return f"Birthday {self.birthday} add to contact {self.name}"
+
+    
     def days_to_birthday(self, birthday):
         date_now = datetime.now().date()
         date_bd = birthday.value.replace(year=date_now.year)
@@ -105,7 +114,6 @@ class Record():
         else:
             date_bd = birthday.value.replace(year=date_now.year + 1)
             result = date_bd - date_now
-
         return f"{self.name}'s birthday will be in {result.days} days"
 
 
@@ -116,8 +124,18 @@ class AddressBook(UserDict):
             return f"Added {record.name.value} with phone number {', '.join(str(phone) for phone in record.phones)}"
         else:            
             return f"Record {record.name.value} alredy exists"
-        
-    def iterator(self, n):
-        pass
+    
+    def __iter__(self):
+        return self.iterator()
+
+    def iterator(self, group_size):
+        records = list(self.data.values())
+        self.current_index = 0
+
+        while self.current_index < len(records):
+            group_items = records[self.current_index:self.current_index + group_size]
+            group = [rec for rec in group_items]
+            self.current_index += group_size
+            yield group
 
         

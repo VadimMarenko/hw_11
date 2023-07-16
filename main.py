@@ -17,17 +17,24 @@ def input_error(func):
 @input_error
 def birthday_command(*args):
     name = Name(args[0].capitalize())
-    bd = Birthday(args[1])
-    if name in address_book:
-        rec: Record = address_book[str(name)]    
-        rec.birthday = bd
-        return rec.days_to_birthday(bd)
-        return f"Added date of birth {str(rec.birthday)} for {name}"
+    bd = Birthday(args[1])        
+    rec: Record = address_book.get(str(name))
+    if rec:
+        return rec.add_birthday(bd)        
     else:
         rec = Record(name, birthday=bd)
-        address_book.add_record(rec)
-        return rec.days_to_birthday(bd)
-    return f"{name}'s birthday {bd}"
+        address_book.add_record(rec)        
+        return f"{name}'s birthday {bd} added"
+
+
+@input_error
+def bd_command(*args):
+    name = Name(args[0].capitalize())
+    rec: Record = address_book.get(str(name))
+    if rec.birthday:
+        return rec.days_to_birthday(rec.birthday)
+    else:
+        return "No birthday record found."
 
 
 @input_error
@@ -56,10 +63,9 @@ def change_command(*args):
 @input_error
 def phone_command(*args):    
     name = Name(args[0].capitalize())
-    record = Record(name)
-    for key, value in address_book.items():
-        if key == record.name.value:                             
-            return f"{key} has phone number {', '.join(str(phone) for phone in value.phones)}"
+    rec: Record = address_book.get(str(name))
+    if rec:    
+        return f"{rec.name} has phone number {', '.join(str(phone) for phone in rec.phones)}"
     else:
         return f"Name '{name}' was not found"
         
@@ -68,9 +74,27 @@ def greeting_command(*args):
     return f"How can I help you? \
         \n {help()}"
 
-
+@input_error
 def show_all_command(*args):
-    return "\n".join((str(record.name) + ' ' + (str(record.birthday) if record.birthday else "-") + ' ' + (', '.join(str(phone) for phone in record.phones))) for record in address_book.values())
+    if args:
+        count = int(args[0])
+    else:
+        count = 15
+    page = address_book.iterator(count)
+    
+    while ch := input("Enter any key to browsing (empty to exit): "):
+        try:
+            result = next(page)
+            print("_" * 100)
+            print("| {:15} | {:15} | {:60} ".format("name", "birthday", "phones")) 
+            print("-" * 100)          
+            for record in result:
+                phones = ', '.join(str(phone) for phone in record.phones)
+                print("| {:<15} | {:<15} | {:<60} ".format(str(record.name),  
+                                               str(record.birthday) if record.birthday else "-",
+                                               phones))             
+        except StopIteration as e:
+            return f"The book is over\n"
 
 
 def exit_command(*args):
@@ -80,10 +104,12 @@ def exit_command(*args):
 def help():
     return "Supported commands\n \
         \nadd name number \
-        \nchange name number \
+        \nchange name old_number new_number \
         \nphone name \
         \nshow all \
+        \nshow all <Number of entries per page> \
         \nbirthday name dd-mm-yyyy \
+        \nbd name \
         \nexit \
         \n"
 
@@ -98,7 +124,8 @@ COMMANDS = {
     change_command: ("change", ),
     phone_command: ("phone", ),
     show_all_command: ("show all", ),
-    birthday_command: ("birthday", ),
+    birthday_command: ("birthday", ),    
+    bd_command: ("bd", ),
     exit_command: ("good bye", "close", "exit")
 }
 
